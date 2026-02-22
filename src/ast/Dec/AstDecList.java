@@ -98,4 +98,16 @@ public class AstDecList extends AstList
         if (tail != null) tail.irMe();
         return null;
     }
+
+    /** Pass 1: emit IR only for global variable declarations (allocate + init). */
+    public void irMeVarDecs() {
+        if (head instanceof AstVarDec) head.irMe();
+        if (tail != null) tail.irMeVarDecs();
+    }
+
+    /** Pass 2: emit IR only for function declaration bodies. */
+    public void irMeFuncDecs() {
+        if (head instanceof AstFuncDec) head.irMe();
+        if (tail != null) tail.irMeFuncDecs();
+    }
 }

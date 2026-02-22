@@ -12,10 +12,7 @@ public class AstVarSimple extends AstVar
 	/* simple variable name */
 	/************************/
 	public String name;
-	
-	/******************/
-	/* CONSTRUCTOR(S) */
-	/******************/
+        public String irVarName = null; // scope-qualified IR name, e.g. "x_0"
 	public AstVarSimple(String name)
 	{
 		/******************************/
@@ -74,14 +71,19 @@ public class AstVarSimple extends AstVar
             System.out.format(">> ERROR: Variable %s not found at line %d\n", name, this.lineNumber);
             error();
         }
-        
+
+        // 4. Record which scope this variable resolves to, for IR generation
+        int scopeIdx = tbl.getScopeIndexOf(name);
+        irVarName = name + "_" + scopeIdx;
+
         return t;
     }
 
     public Temp irMe()
     {
         Temp t = TempFactory.getInstance().getFreshTemp();
-        Ir.getInstance().AddIrCommand(new IrCommandLoad(t, name));
+        String varIrName = (irVarName != null) ? irVarName : name;
+        Ir.getInstance().AddIrCommand(new IrCommandLoad(t, varIrName));
         return t;
     }
 }

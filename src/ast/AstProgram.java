@@ -55,9 +55,11 @@ public class AstProgram extends AstNode {
     }
 
     public temp.Temp irMe() {
-        // Generate IR for all declarations
         if (decList != null) {
-            decList.irMe();
+            // Pass 1: global variable allocates + initializations (in source order, before any function body)
+            decList.irMeVarDecs();
+            // Pass 2: function bodies (main runs after all globals are initialized)
+            decList.irMeFuncDecs();
         }
         return null;
     }

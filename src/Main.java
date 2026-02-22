@@ -68,21 +68,27 @@ public class Main
 			// Get IR commands -tomerm edit from here
    			List<ir.IrCommand> irCommands = ir.Ir.getInstance().getCommandList();
 
-			// Build CFG
-			cfg.Fullcfggraph controlFlowGraph = cfg.Fullcfggraph.buildFromIR(irCommands);
+// Build CFG
+                        cfg.Fullcfggraph controlFlowGraph = cfg.Fullcfggraph.buildFromIR(irCommands);
 
-			// Run dataflow analysis
-			Set<String> uninitializedVars = controlFlowGraph.runDataflowAnalysis();
+                        // Run dataflow analysis
+                        Set<String> uninitializedVars = controlFlowGraph.runDataflowAnalysis();
 
-			/****************************************/
-			/* [9] Output dataflow analysis results */
-			/****************************************/
-			if (uninitializedVars.isEmpty()) {
-				// No uninitialized variables detected
-				fileWriter.write("!OK");
-			} else {
-				// Sort and output each uninitialized variable on separate line
-				List<String> sortedVars = new ArrayList<>(uninitializedVars);
+                        // Convert scope-qualified IR names (e.g. "x_0") back to original source names (e.g. "x")
+                        Set<String> originalVarNames = new java.util.HashSet<>();
+                        for (String irName : uninitializedVars) {
+                                originalVarNames.add(ir.Ir.getInstance().getOriginalName(irName));
+                        }
+
+                        /****************************************/
+                        /* [9] Output dataflow analysis results */
+                        /****************************************/
+                        if (originalVarNames.isEmpty()) {
+                                // No uninitialized variables detected
+                                fileWriter.write("!OK");
+                        } else {
+                                // Sort and output each uninitialized variable on separate line
+                                List<String> sortedVars = new ArrayList<>(originalVarNames);
 				Collections.sort(sortedVars);
 				for (int i = 0; i < sortedVars.size(); i++) {
 					fileWriter.write(sortedVars.get(i));

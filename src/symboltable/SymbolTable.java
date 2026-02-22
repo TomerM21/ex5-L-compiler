@@ -62,6 +62,19 @@ public class SymbolTable
 		}
 		return null;
 	}
+
+	public int getScopeIndex() { return scopeIndex; }
+
+	public int getScopeIndexOf(String name)
+	{
+		for (int i = scopeIndex; i >= 0; i--) {
+			if (findInScope(name, i) != null) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	public Type currentFunctionReturnType = null;
 	public TypeClass currentClass = null;  // Track the current class context for field lookups
 

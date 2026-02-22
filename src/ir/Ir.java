@@ -48,9 +48,16 @@ public class Ir
 	/*****************************/
 	/* PREVENT INSTANTIATION ... */
 	/*****************************/
-	protected Ir() {}
+        private java.util.HashMap<String, String> irNameToOriginalName = new java.util.HashMap<>();
 
-	/******************************/
+        public void registerIrName(String irName, String originalName) {
+                irNameToOriginalName.put(irName, originalName);
+        }
+
+        public String getOriginalName(String irName) {
+                return irNameToOriginalName.getOrDefault(irName, irName);
+        }
+
 	/* GET SINGLETON INSTANCE ... */
 	/******************************/
 	public static Ir getInstance()

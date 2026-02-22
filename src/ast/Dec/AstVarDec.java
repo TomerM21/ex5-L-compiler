@@ -18,6 +18,7 @@ public class AstVarDec extends AstDec {
     private String name; // string name of the var
     private AstExp exp; // optional initialization expression
     private AstNewExp newExp; // optional new expression for class types
+    private String irVarName = null; // scope-qualified IR name, e.g. "x_0"
 
     public AstVarDec(AstType typeNode, String name, AstExp exp, AstNewExp newExp)
     {
@@ -109,7 +110,10 @@ public class AstVarDec extends AstDec {
             }
         }
 
-        // 6. Enter Variable into Symbol Table (So subsequent code can use it)
+        // 6. Compute unique IR name using current scope index (before entering)
+        irVarName = name + "_" + SymbolTable.getInstance().getScopeIndex();
+
+        // 6b. Enter Variable into Symbol Table (So subsequent code can use it)
         SymbolTable.getInstance().enter(name, varType);
 
         // 7. RETURN THE WRAPPER
@@ -130,18 +134,24 @@ public class AstVarDec extends AstDec {
 
     public Temp irMe()
     {
+        // Use scope-qualified IR name to distinguish shadowed variables
+        String varIrName = (irVarName != null) ? irVarName : name;
+
+        // Register mapping from IR name back to original source name
+        Ir.getInstance().registerIrName(varIrName, name);
+
         // Allocate space for the variable
-        Ir.getInstance().AddIrCommand(new IrCommandAllocate(name));
+        Ir.getInstance().AddIrCommand(new IrCommandAllocate(varIrName));
 
         // If there's an initialization expression, evaluate and store it
         if (exp != null) {
             Temp expTemp = exp.irMe();
-            Ir.getInstance().AddIrCommand(new IrCommandStore(name, expTemp));
+            Ir.getInstance().AddIrCommand(new IrCommandStore(varIrName, expTemp));
         }
         // If there's a new expression, evaluate and store it
         else if (newExp != null) {
             Temp newTemp = newExp.irMe();
-            Ir.getInstance().AddIrCommand(new IrCommandStore(name, newTemp));
+            Ir.getInstance().AddIrCommand(new IrCommandStore(varIrName, newTemp));
         }
 
         return null;

@@ -99,7 +99,8 @@ public class AstStmtAssign extends AstStmt
         if (var instanceof AstVarSimple) {
             // Simple variable: x := exp
             AstVarSimple simpleVar = (AstVarSimple) var;
-            Ir.getInstance().AddIrCommand(new IrCommandStore(simpleVar.name, src));
+            String varIrName = (simpleVar.irVarName != null) ? simpleVar.irVarName : simpleVar.name;
+            Ir.getInstance().AddIrCommand(new IrCommandStore(varIrName, src));
         } else if (var instanceof AstVarField) {
             // Field access: obj.field := exp
             AstVarField fieldVar = (AstVarField) var;
