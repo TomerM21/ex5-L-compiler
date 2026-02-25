@@ -54,21 +54,21 @@ CUP_FLAGS =                                \
 # DEFINITIONS :: PARSER #
 #########################
 INPUT    = ${INPUT_DIR}/Input.txt
-OUTPUT   = ${OUTPUT_DIR}/Output.txt
+OUTPUT   = ${OUTPUT_DIR}/mips.txt
 
 ##########
 # TARGET #
 ##########
-compile:
+all:
 	clear
 	@echo "*******************************"
 	@echo "*                             *"
 	@echo "*                             *"
-	@echo "* [0] Remove ANALYZER program *"
+	@echo "* [0] Remove COMPILER program *"
 	@echo "*                             *"
 	@echo "*                             *"
 	@echo "*******************************"
-	rm -rf ANALYZER
+	rm -rf COMPILER
 	@echo "\n"
 	@echo "************************************************************"
 	@echo "*                                                          *"
@@ -117,7 +117,9 @@ compile:
 	@echo "*                                                         *"
 	@echo "*                                                         *"
 	@echo "***********************************************************"
-	jar cfm ANALYZER ${MANIFEST_FILE} -C ${BIN_DIR} .
+	jar cfm COMPILER ${MANIFEST_FILE} -C ${BIN_DIR} .
+
+everything: all
 	@echo "\n"
 	@echo "*****************************"
 	@echo "*                           *"
@@ -126,4 +128,13 @@ compile:
 	@echo "*                           *"
 	@echo "*                           *"
 	@echo "*****************************"
-	java -jar ANALYZER ${INPUT} ${OUTPUT}
+	java -jar COMPILER ${INPUT} ${OUTPUT}
+	@echo "\n"
+	@echo "****************************************"
+	@echo "*                                      *"
+	@echo "*                                      *"
+	@echo "* [7] Run spim and redirect its output *"
+	@echo "*                                      *"
+	@echo "*                                      *"
+	@echo "****************************************"
+	spim -f ${OUTPUT_DIR}/mips.txt > ${OUTPUT_DIR}/MIPS_OUTPUT.txt
