@@ -194,9 +194,31 @@ public class AstClassDec extends AstDec {
 
     public temp.Temp irMe()
     {
-        // Class declarations don't generate IR code
-        // They're just type definitions used by the semantic analyzer
-        // Member variables and methods will generate code when instantiated/called
-        return null;
+          SymbolTable tbl = SymbolTable.getInstance();
+
+    // Save previous class context
+    TypeClass previousClass = tbl.currentClass;
+
+    // Set current class
+    tbl.currentClass = (TypeClass) tbl.find(name);
+
+    // Emit IR for each method in declaration order
+    if (dataMemberList != null) {
+        AstCFieldList it = dataMemberList;
+        while (it != null) {
+
+            // Only methods generate IR here
+            if (it.head instanceof AstFuncDec) {
+                ((AstFuncDec) it.head).irMe();
+            }
+
+            it = it.tail;
+        }
+    }
+
+    // Restore previous class context
+    tbl.currentClass = previousClass;
+
+    return null;
     }
 }

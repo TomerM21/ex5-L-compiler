@@ -76,6 +76,7 @@ public class AstCallExp extends AstExp {
     @Override
     public Type SemantMe() {
         types.TypeFunction funcType = null;
+        private String resolvedClassName = null; // set when receiver != null
 
         // 1. Find the Function
         if (receiver == null) {
@@ -138,28 +139,53 @@ public class AstCallExp extends AstExp {
             System.out.println(">> ERROR: Argument count mismatch");
             error();
         }
-
+        if (receiver != null) {
+        this.resolvedClassName = tc.name;
+        }
         return funcType.returnType;
     }
 
     public temp.Temp irMe()
     {
-        // Build argument list
-        ir.TempList argList = null;
-        if (args != null) {
-            argList = args.irMe();
+       // Evaluate args left-to-right
+    ir.TempList argList = null;
+
+    // For method calls, self is the first argument
+    if (receiver != null) {
+        temp.Temp selfTemp = receiver.irMe();
+        argList = new ir.TempList(selfTemp, null);
+    }
+
+    // Evaluate explicit args and append
+    if (args != null) {
+        ir.TempList explicitArgs = args.irMe();
+        if (argList == null) {
+            argList = explicitArgs;
+        } else {
+            // Append explicitArgs to end of argList
+            ir.TempList cursor = argList;
+            while (cursor.tail != null) cursor = cursor.tail;
+            cursor.tail = explicitArgs;
         }
-        
-        // Special case: PrintInt is a built-in that we handle specially
-        if ("PrintInt".equals(methodName) && argList != null && argList.head != null) {
-            ir.Ir.getInstance().AddIrCommand(new ir.IrCommandPrintInt(argList.head));
-            return null; // PrintInt doesn't return a value
-        }
-        
-        // For regular function calls, generate call instruction
-        temp.Temp result = temp.TempFactory.getInstance().getFreshTemp();
-        ir.Ir.getInstance().AddIrCommand(new ir.IrCommandCall(result, methodName, argList));
-        
-        return result;
+    }
+
+    // Built-ins
+    if ("PrintInt".equals(methodName) && argList != null) {
+        ir.Ir.getInstance().AddIrCommand(new ir.IrCommandPrintInt(argList.head));
+        return null;
+    }
+    if ("PrintString".equals(methodName) && argList != null) {
+        ir.Ir.getInstance().AddIrCommand(new ir.IrCommandPrintString(argList.head));
+        return null;
+    }
+
+    // Determine callee label
+    String callee = (resolvedClassName != null)
+        ? resolvedClassName + "_" + methodName
+        : methodName;
+
+    temp.Temp result = temp.TempFactory.getInstance().getFreshTemp();
+    ir.Ir.getInstance().AddIrCommand(new ir.IrCommandCall(result, callee, argList));
+    return result;
     }
 }

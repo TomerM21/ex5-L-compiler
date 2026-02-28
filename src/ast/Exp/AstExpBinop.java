@@ -4,6 +4,8 @@ import ast.AstGraphviz;
 import ast.AstNodeSerialNumber;
 
 import types.Type;
+import types.TypeInt;
+import types.TypeString;
 import temp.*;
 import ir.*;
 
@@ -12,7 +14,7 @@ public class AstExpBinop extends AstExp
 	int op;
 	public AstExp left;
 	public AstExp right;
-	
+	private Type leftType;
 	/******************/
 	/* CONSTRUCTOR(S) */
 	/******************/
@@ -80,6 +82,7 @@ public class AstExpBinop extends AstExp
 	@Override
     public Type SemantMe() {
         Type t1 = left.SemantMe();
+        this.leftType = t1; // Store left type for potential use in IR generation
         Type t2 = right.SemantMe();
 
         System.out.println("DEBUG ExpBinop: op=" + op + ", t1=" + (t1!=null?t1.name:"null") + ", t2=" + (t2!=null?t2.name:"null") + ", line=" + this.lineNumber);
@@ -87,20 +90,30 @@ public class AstExpBinop extends AstExp
         // 1. Equality Check (EQ: 6)
         if (op == 6) {
             // Check if types are compatible (Same type, or Class inheritance, or Nil)
-            if (!ast.Helpers.HelperFunctions.canAssign(t1, t2) && 
-                !ast.Helpers.HelperFunctions.canAssign(t2, t1)) {
-                 System.out.println(">> ERROR: Equality check type mismatch");
-                 error();
+            if (leftType instanceof TypeString)
+             {
+                 Ir.getInstance().AddIrCommand(new IrCommandBinopEqStrings(dst, t1, t2));
             }
-            return types.TypeInt.getInstance();
+            else if (leftType instanceof TypeInt) {
+                 Ir.getInstance().AddIrCommand(new IrCommandBinopEqIntegers(dst, t1, t2)
+                );
+                }
+            else {
+        // class, array, nil → pointer equality
+             Ir.getInstance().AddIrCommand( new IrCommandBinopEqPointers(dst, t1, t2));
+             }
         }
 
         // 2. Addition (PLUS: 0) - Supports Ints and Strings
         if (op == 0) {
-            if (t1.isInt() && t2.isInt()) return types.TypeInt.getInstance();
-            if (t1.isString() && t2.isString()) return types.TypeString.getInstance();
-            System.out.println(">> ERROR: Plus must be between two Ints or two Strings at line " + this.lineNumber);
-            error();
+             if (leftType instanceof TypeString)
+              {
+        Ir.getInstance().AddIrCommand(new IrCommandBinopConcatStrings(dst, t1, t2));
+             }
+    e      else {
+        Ir.getInstance().AddIrCommand(
+            new IrCommandBinopAddIntegers(dst, t1, t2));
+            }
         }
 
         // 3. Other Math/Relational Ops (-, *, /, <, >) - Ints only

@@ -116,19 +116,39 @@ public class AstNewExp extends AstExp {
 
     public temp.Temp irMe()
     {
-        temp.Temp dst = temp.TempFactory.getInstance().getFreshTemp();
-        
-        if (sizeExp != null) {
-            // Array allocation: new Type[size]
-            temp.Temp sizeTemp = sizeExp.irMe();
-            String typeName = type.toString(); // Get type name
-            ir.Ir.getInstance().AddIrCommand(new ir.IrCommandNewArray(dst, sizeTemp, typeName));
-        } else {
-            // Object allocation: new Type
-            String className = type.toString(); // Get class name
-            ir.Ir.getInstance().AddIrCommand(new ir.IrCommandNewClass(dst, className));
+     // יוצרים Temp חדש שבו נשמור את האובייקט/מערך שנוצר
+    temp.Temp dst = temp.TempFactory.getInstance().getFreshTemp();
+
+    if (newClassType != null) {
+        // Case: new ClassName
+        // יוצרים את האובייקט
+        ir.Ir.getInstance().AddIrCommand(new ir.IrCommandNewClass(dst, newClassType.name));
+
+        // אתחול שדות קבועים (non-null / non-zero)
+        for (Map.Entry<String, Type> entry : newClassType.fields.entrySet()) {
+            String fieldName = entry.getKey();
+            Object initValue = entry.getValue().initializer; // הערך שמור מה-semantic pass
+
+            if (initValue != null && !initValue.equals(0)) {
+                temp.Temp valueTemp = temp.TempFactory.getInstance().getFreshTemp();
+
+                // נניח שיש דרך להטעין קבוע ל-Temp
+                ir.Ir.getInstance().AddIrCommand(new ir.IrCommandLoadConst(valueTemp, initValue));
+
+                // שומרים את הערך בשדה
+                ir.Ir.getInstance().AddIrCommand(new ir.IrCommandFieldStore(dst, fieldName, valueTemp));
+            }
         }
-        
-        return dst;
+
+    } else {
+        // Case: new type[exp]
+        // מחשבים את הגודל
+        temp.Temp sizeTemp = sizeExp.irMe();
+
+        // יוצרים מערך בגודל sizeTemp עם סוג האלמנט המתאים
+        ir.Ir.getInstance().AddIrCommand(new ir.IrCommandNewArray(dst, sizeTemp, elementTypeName));
+    }
+
+    return dst;
     }
 }

@@ -1,6 +1,7 @@
 package types;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class TypeClass extends Type
 {
@@ -16,8 +17,8 @@ public class TypeClass extends Type
 	/**************************************************/
 	public TypeList dataMembers;
 	
-	public HashMap<String, Type> fields = new HashMap<>();
-	public HashMap<String, TypeFunction> methods = new HashMap<>();
+public LinkedHashMap<String, Type> fields = new LinkedHashMap<>();
+public HashMap<String, TypeFunction> methods = new HashMap<>();
 
 	/****************/
 	/* CTROR(S) ... */
@@ -87,4 +88,23 @@ public class TypeClass extends Type
 			it = it.tail;
 		}
 	}
+	public int getFieldOffset(String fieldName) {
+    int offset = 0;
+    if (father != null) {
+        int fatherResult = father.getFieldOffset(fieldName);
+        if (fatherResult >= 0) return fatherResult;
+        offset = father.totalFieldCount();
+    }
+    int i = 0;
+    for (String key : fields.keySet()) {
+        if (key.equals(fieldName)) return offset + i;
+        i++;
+    }
+    return -1;
+}
+
+public int totalFieldCount() {
+    int parentCount = (father != null) ? father.totalFieldCount() : 0;
+    return parentCount + fields.size();
+}
 }

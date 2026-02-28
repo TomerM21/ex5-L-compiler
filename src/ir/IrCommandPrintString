@@ -1,0 +1,32 @@
+package ir;
+import java.util.*;
+
+/*******************/
+/* PROJECT IMPORTS */
+/*******************/
+import temp.*;
+
+public class IrCommandPrintString extends IrCommand
+{
+	Temp t;
+	
+	public IrCommandPrintString(Temp t)
+	{
+		this.t = t;
+	}
+	
+	@Override
+	public String toString() {
+		return "PrintString(Temp_" + t.getSerialNumber() + ")";
+	}
+
+	public Set<String> getReadTemps() {
+		Set<String> result = new HashSet<>();
+		result.add("Temp_" + t.getSerialNumber());
+		return result;
+	}
+
+	public Set<String> getWriteTemps() {
+		return new HashSet<>();
+	}
+}

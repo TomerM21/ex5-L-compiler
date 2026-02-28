@@ -2,7 +2,8 @@
 /* PACKAGE */
 /***********/
 package ir;
-
+import java.util.Map;
+import java.util.HashMap;
 /*******************/
 /* GENERAL IMPORTS */
 /*******************/
@@ -13,6 +14,7 @@ package ir;
 
 public class Ir
 {
+	private Map<String, Integer> paramIndex = new HashMap<>();
 	private IrCommand head=null;
 	private IrCommandList tail=null;
 
@@ -112,4 +114,19 @@ public class Ir
 		
 		writer.close();
 	}
+	public void registerParam(String irName, int index) 
+	{
+    paramIndex.put(irName, index);
+	}
+
+	public boolean isParam(String irName) 
+	{
+    return paramIndex.containsKey(irName);
+	}
+
+    public int getParamIndex(String irName)
+	{
+    return paramIndex.get(irName);
+    }
+	
 }
