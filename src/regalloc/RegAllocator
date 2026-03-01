@@ -1,0 +1,68 @@
+package regalloc;
+
+import cfg.InterferenceGraph;
+import java.util.*;
+
+public class RegisterAllocator {
+    private static final int K = 10; // $t0 – $t9
+    private static final String[] REGS = {
+        "$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$t8","$t9"
+    };
+    private final InterferenceGraph originalGraph;
+
+    public RegisterAllocator(InterferenceGraph graph) {
+        this.originalGraph = graph;
+    }
+
+    /**
+     * Returns a coloring map Temp_N → "$tK".
+     * Prints "Register Allocation Failed" and exits if coloring is impossible.
+     */
+    public Map<String, String> allocate() {
+        // --- Simplification phase ---
+        Deque<String> stack = new ArrayDeque<>();
+        Set<String> removed = new HashSet<>();
+        // Work on a virtual copy (track active degrees)
+        Map<String, Set<String>> activeDeg = new HashMap<>();
+        for (String n : originalGraph.nodes()) {
+            activeDeg.put(n, new HashSet<>(originalGraph.neighbors(n)));
+        }
+
+        while (activeDeg.size() > removed.size()) {
+            String best = null;
+            for (String n : activeDeg.keySet()) {
+                if (removed.contains(n)) continue;
+                long deg = activeDeg.get(n).stream().filter(nb -> !removed.contains(nb)).count();
+                if (deg < K) { best = n; break; }
+            }
+            if (best == null) {
+                System.out.println("Register Allocation Failed");
+                System.exit(1);
+            }
+            stack.push(best);
+            removed.add(best);
+        }
+
+        // --- Reconstruction phase ---
+        Map<String, String> coloring = new HashMap<>();
+        while (!stack.isEmpty()) {
+            String n = stack.pop();
+            Set<String> usedColors = new HashSet<>();
+            for (String nb : originalGraph.neighbors(n)) {
+                if (coloring.containsKey(nb)) usedColors.add(coloring.get(nb));
+            }
+            for (String reg : REGS) {
+                if (!usedColors.contains(reg)) {
+                    coloring.put(n, reg);
+                    break;
+                }
+            }
+            if (!coloring.containsKey(n)) {
+                // Should not happen if simplification succeeded
+                System.out.println("Register Allocation Failed");
+                System.exit(1);
+            }
+        }
+        return coloring;
+    }
+}
