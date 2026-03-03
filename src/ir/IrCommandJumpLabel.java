@@ -33,4 +33,10 @@ public class IrCommandJumpLabel extends IrCommand
 	public String toString() {
 		return "goto " + labelName;
 	}
+	@Override
+    public void mipsMe(MipsGenerator mg, Map<String, String> regMap, String funcName) {
+        // Emit an unconditional jump to the label
+        mg.emit("# Jump to label " + labelName + "\n");
+        mg.emit("j " + labelName + "\n");
+    }
 }

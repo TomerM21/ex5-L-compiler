@@ -43,4 +43,18 @@ public class IrCommandBinopSubIntegers extends IrCommand
 		result.add("Temp_" + dst.getSerialNumber());
 		return result;
 	}
+	@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+    // resolve source and destination registers
+    String r1 = reg("Temp_" + t1.getSerialNumber(), regMap);
+    String r2 = reg("Temp_" + t2.getSerialNumber(), regMap);
+    String rd = reg("Temp_" + dst.getSerialNumber(), regMap);
+
+    // emit subtraction
+    mg.emit("sub " + rd + ", " + r1 + ", " + r2 + "\n");
+
+    // clamp result to [-32768, 32767]
+    mg.emitSaturate(rd);
+}
 }

@@ -55,4 +55,26 @@ public class IrCommandCall extends IrCommand
 		}
 		return result;
 	}
+	@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+    // Push args right-to-left
+    Temp[] argsArr = args.toArray(new Temp[0]);
+    for (int i = argsArr.length - 1; i >= 0; i--) {
+        String r = reg("Temp_" + argsArr[i].getSerialNumber(), regMap);
+        mg.emit("subu $sp, $sp, 4\n");
+        mg.emit("sw " + r + ", 0($sp)\n");
+    }
+
+    String callee = funcName.equals("main") ? "user_main" : funcName;
+    mg.emit("jal " + callee + "\n");
+
+    // clean up stack
+    mg.emit("addu $sp, $sp, " + (argsArr.length * 4) + "\n");
+
+    if (dst != null) {
+        String rd = reg("Temp_" + dst.getSerialNumber(), regMap);
+        mg.emit("move " + rd + ", $v0\n");
+    }
+}
 }

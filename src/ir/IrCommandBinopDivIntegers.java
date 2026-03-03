@@ -43,4 +43,12 @@ public class IrCommandBinopDivIntegers extends IrCommand
 		result.add("Temp_" + dst.getSerialNumber());
 		return result;
 	}
+	@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+String r1 = reg(...), r2 = reg(...), rd = reg(...);
+mg.emitDivByZeroCheck(r2);
+mg.emit("div " + r1 + ", " + r2 + "\n");
+mg.emit("mflo " + rd + "\n");
+mg.emitSaturate(rd);
+}
 }

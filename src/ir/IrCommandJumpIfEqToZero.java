@@ -47,4 +47,10 @@ public class IrCommandJumpIfEqToZero extends IrCommand
 	public Set<String> getWriteTemps() {
 		return new HashSet<>();
 	}
+@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+    String r = reg("Temp_" + t.getSerialNumber(), regMap);
+    mg.emit("beqz " + r + ", " + labelName + "\n");
+}
 }

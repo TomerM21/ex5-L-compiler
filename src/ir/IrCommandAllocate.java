@@ -38,4 +38,21 @@ public class IrCommandAllocate extends IrCommand
     
     // Override: Allocate always writes UNINITIALIZED (special case)
     // We need to handle this in the transfer function
+    @Override
+    public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+   if (mg.isGlobalPhase()) 
+   {
+        // allocate in .data section
+        mg.globalVarAllocate(varName);
+        // register as global inside IR
+        Ir.getInstance().registerGlobal(varName);
+
+    } 
+    else
+    {
+        // local variable → only reserve stack slot
+        mg.resolveLocal(varName);
+    }
+}
 }

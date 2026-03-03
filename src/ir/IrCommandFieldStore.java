@@ -41,4 +41,15 @@ public class IrCommandFieldStore extends IrCommand
 	public Set<String> getWriteTemps() {
 		return new HashSet<>();
 	}
+	@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+    String rObj = reg("Temp_" + object.getSerialNumber(), regMap);
+    String rVal = reg("Temp_" + value.getSerialNumber(), regMap);
+
+    mg.emitNilCheck(rObj);
+
+    int offset = getClassFieldOffset(objectClassName, fieldName) * 4;
+    mg.emit("sw " + rVal + ", " + offset + "(" + rObj + ")\n");
+}
 }

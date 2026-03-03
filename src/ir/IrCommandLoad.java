@@ -46,4 +46,27 @@ public class IrCommandLoad extends IrCommand
 		result.add("Temp_" + dst.getSerialNumber());
 		return result;
 	}
+	@Override
+	public void mipsMe(MipsGenerator mg, Map<String,String> regMap,String funcName) {
+	String r = reg("Temp_" + dst.getSerialNumber(), regMap);
+Ir irSingleton = Ir.getInstance();
+
+if (irSingleton.isParam(varName)) {
+
+    int idx = irSingleton.getParamIndex(varName);
+    int fpOffset = 8 + idx * 4;
+    mg.emit("lw " + r + ", " + fpOffset + "($fp)\n");
+
+} else if (irSingleton.isGlobal(varName)) {
+
+    mg.emit("lw " + r + ", " + varName + "\n");
+
+} else {
+
+    int slot = mg.resolveLocal(varName);
+    mg.emit("lw " + r + ", " + slot + "($fp)\n");
+}
+
+
+	}
 } 

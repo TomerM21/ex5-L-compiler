@@ -43,4 +43,20 @@ public class IrCommandArrayLoad extends IrCommand
 		result.add("Temp_" + dst.getSerialNumber());
 		return result;
 	}
+	@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+    String rArr = reg("Temp_" + array.getSerialNumber(), regMap);
+    String rIdx = reg("Temp_" + index.getSerialNumber(), regMap);
+    String rd   = reg("Temp_" + dst.getSerialNumber(), regMap);
+
+    mg.emitNilCheck(rArr);
+    mg.emitBoundsCheck(rArr, rIdx);
+
+    mg.emit("move $s0, " + rIdx + "\n");
+    mg.emit("addi $s0, $s0, 1\n");   // skip length slot
+    mg.emit("sll $s0, $s0, 2\n");    // multiply by 4
+    mg.emit("add $s0, " + rArr + ", $s0\n"); // compute address
+    mg.emit("lw " + rd + ", 0($s0)\n");      // load element
+}
 }

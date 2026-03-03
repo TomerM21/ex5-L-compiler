@@ -43,4 +43,11 @@ public class IrCommandBinopLtIntegers extends IrCommand
 		result.add("Temp_" + dst.getSerialNumber());
 		return result;
 	}
+@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+	String r1 = reg("Temp_" + t1.getSerialNumber(), regMap);
+    String r2 = reg("Temp_" + t2.getSerialNumber(), regMap);
+    String rd = reg("Temp_" + dst.getSerialNumber(), regMap);
+	mg.emit("slt " + rd + ", " + r1 + ", " + r2 + "\n");
+}
 }

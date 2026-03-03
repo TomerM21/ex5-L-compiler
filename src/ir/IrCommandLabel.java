@@ -28,4 +28,19 @@ public class IrCommandLabel extends IrCommand
 	public String toString() {
 		return labelName + ":";
 	}
+	@Override
+	public void mipsMe(MipsGenerator mg,
+                   Map<String,String> regMap,
+                   String funcName) {
+
+    if (isFunctionEntry) {
+
+        // simplest safe solution: fixed 64 local slots
+        mg.startFunction(labelName, 64);
+
+    } else {
+
+        mg.emit(labelName + ":\n");
+    }
+}
 }

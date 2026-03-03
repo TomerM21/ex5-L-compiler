@@ -2,7 +2,7 @@
 /* PACKAGE */
 /***********/
 package ir;
-
+import java.util.Map;
 import java.util.*;
 
 /*******************/
@@ -19,6 +19,13 @@ public abstract class IrCommand
     /* Label Factory */
     /*****************/
     protected static int labelCounter = 0;
+    public abstract void mipsMe(
+        mips.MipsGenerator mg,
+        Map<String,String> regMap,
+        String funcName);
+        protected String reg(String tempName, Map<String,String> regMap) {
+    return regMap.getOrDefault(tempName, "$t0");
+}
     public    static String getFreshLabel(String msg)
     {
         return String.format("Label_%d_%s", labelCounter++,msg);

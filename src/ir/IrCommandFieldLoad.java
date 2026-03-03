@@ -42,4 +42,15 @@ public class IrCommandFieldLoad extends IrCommand
 		result.add("Temp_" + dst.getSerialNumber());
 		return result;
 	}
+	@Override
+public void mipsMe(MipsGenerator mg,Map<String,String> regMap,String funcName) {
+
+    String rObj = reg("Temp_" + object.getSerialNumber(), regMap);
+    String rd   = reg("Temp_" + dst.getSerialNumber(), regMap);
+
+    mg.emitNilCheck(rObj);
+
+    int offset = getClassFieldOffset(objectClassName, fieldName) * 4;
+    mg.emit("lw " + rd + ", " + offset + "(" + rObj + ")\n");
+}
 }

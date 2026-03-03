@@ -42,4 +42,20 @@ public class IrCommandArrayStore extends IrCommand
 	public Set<String> getWriteTemps() {
 		return new HashSet<>();
 	}
+	@Override
+public void mipsMe(MipsGenerator mg, Map<String,String> regMap,String funcName) {
+
+    String rArr = reg("Temp_" + array.getSerialNumber(), regMap);
+    String rIdx = reg("Temp_" + index.getSerialNumber(), regMap);
+    String rVal = reg("Temp_" + value.getSerialNumber(), regMap);
+
+    mg.emitNilCheck(rArr);
+    mg.emitBoundsCheck(rArr, rIdx);
+
+    mg.emit("move $s0, " + rIdx + "\n");
+    mg.emit("addi $s0, $s0, 1\n");   // skip length slot
+    mg.emit("sll $s0, $s0, 2\n");    // multiply by 4
+    mg.emit("add $s0, " + rArr + ", $s0\n"); // compute address
+    mg.emit("sw " + rVal + ", 0($s0)\n");    // store element
+}
 }
